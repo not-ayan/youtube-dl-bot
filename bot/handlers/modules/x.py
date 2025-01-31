@@ -13,7 +13,11 @@ router = Router()
 
 def vids_count(url: str) -> int:
     with yt_dlp.YoutubeDL() as ydl:
-        info = ydl.extract_info(url, download=False)
+        try:
+            info = ydl.extract_info(url, download=False)
+        except yt_dlp.utils.DownloadError as e:
+            logging.error(f"yt-dlp failed: {e}")
+            return 0
         if "entries" in info:
             return len(info["entries"])
         return 1
@@ -59,6 +63,8 @@ async def x(message: types.Message) -> None:
         except exceptions.TelegramBadRequest:
             pass
         await message.answer("Multiple videos found in the post. Please select which one you want to download", reply_markup=keyboard(count, message.text))
+    elif count == 0:
+        await message.answer("No video could be found in this tweet.")
     else:
         filename = f"{time.time_ns()}-{message.from_user.id}.mp4"
         await master_handler(
