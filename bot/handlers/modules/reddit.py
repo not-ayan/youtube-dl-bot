@@ -28,12 +28,13 @@ def download_reddit_post(url: str, filename: str) -> str:
         logging.error(f"Error downloading Reddit post: {e}")
         raise ValueError("Requested format is not available. Please try a different format.")
     
-    if not os.path.isfile(filename):
-        logging.error(f"File {filename} not found after download.")
+    merged_filename = filename.replace('.jpg', '.mp4')
+    if not os.path.isfile(merged_filename):
+        logging.error(f"File {merged_filename} not found after download.")
         raise ValueError("File download failed. Please try again.")
     
-    logging.info(f"File {filename} downloaded successfully.")
-    return filename
+    logging.info(f"File {merged_filename} downloaded successfully.")
+    return merged_filename
 
 links = [
     "https://www.reddit.com/r/",
