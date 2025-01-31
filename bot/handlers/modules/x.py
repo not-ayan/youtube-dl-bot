@@ -40,6 +40,7 @@ def keyboard(number: int, url: str) -> types.InlineKeyboardMarkup:
 
 @router.message(F.text.startswith(tuple(links)))
 async def x(message: types.Message) -> None:
+    mention = f'<a href="tg://user?id={message.from_user.id}">{message.from_user.full_name}</a>'
     count = vids_count(message.text)
 
     if count > 1:
@@ -51,12 +52,13 @@ async def x(message: types.Message) -> None:
             message=message,
             send_function=message.answer_video,
             download_function=lambda: download_x(message.text, filename),
-            caption=f'<a href="{message.text}">Source</a>\nUploaded by {message.from_user.get_mention()}'
+            caption=f'<a href="{message.text}">Source</a>\nUploaded by {mention}'
         )
 
 
 @router.callback_query(lambda c: c.data.startswith(tuple(links)))
 async def x2(callback: types.CallbackQuery) -> None:
+    mention = f'<a href="tg://user?id={callback.from_user.id}">{callback.from_user.full_name}</a>'
     data = callback.data.split("!")
     filename = f"{time.time_ns()}-{callback.message.from_user.id}.mp4"
 
@@ -64,5 +66,5 @@ async def x2(callback: types.CallbackQuery) -> None:
         message=callback.message,
         send_function=callback.message.answer_video,
         download_function=lambda: download_x(data[0], filename, int(data[-1])),
-        caption=f'<a href="{data[0]}">Source</a>\nUploaded by {callback.from_user.get_mention()}'
+        caption=f'<a href="{data[0]}">Source</a>\nUploaded by {mention}'
     )

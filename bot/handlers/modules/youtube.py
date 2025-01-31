@@ -48,13 +48,14 @@ def keyboard(url: str) -> types.InlineKeyboardMarkup:
 @router.message(F.text.startswith(tuple(links)))
 async def youtube(message: types.Message) -> None:
     try:
+        mention = f'<a href="tg://user?id={message.from_user.id}">{message.from_user.full_name}</a>'
         if any(short in message.text for short in ["https://www.youtube.com/shorts/", "https://youtube.com/shorts/"]):
             filename = f"{time.time_ns()}-{message.from_user.id}.mp4"
             await master_handler(
                 message=message,
                 send_function=message.answer_video,
                 download_function=lambda: download_youtube(message.text, filename, "fhd"),
-                caption=f'<a href="{message.text}">Source</a>\nUploaded by {message.from_user.get_mention()}'
+                caption=f'<a href="{message.text}">Source</a>\nUploaded by {mention}'
             )
         else:
             await message.answer_photo(
@@ -70,6 +71,7 @@ async def youtube(message: types.Message) -> None:
 @router.callback_query(lambda c: c.data.startswith(tuple(links)))
 async def process_download(callback: types.CallbackQuery) -> None:
     url, quality = callback.data.split("!")
+    mention = f'<a href="tg://user?id={callback.from_user.id}">{callback.from_user.full_name}</a>'
     extension = "mp3" if quality == "audio" else "mp4"
     filename = f"{time.time_ns()}-{callback.message.from_user.id}.{extension}"
 
@@ -77,5 +79,5 @@ async def process_download(callback: types.CallbackQuery) -> None:
         message=callback.message,
         send_function=callback.message.answer_video if quality != "audio" else callback.message.answer_audio,
         download_function=lambda: download_youtube(url, filename, quality),
-        caption=f'<a href="{url}">Source</a>\nUploaded by {callback.from_user.get_mention()}'
+        caption=f'<a href="{url}">Source</a>\nUploaded by {mention}'
     )

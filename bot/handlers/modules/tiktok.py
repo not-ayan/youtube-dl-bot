@@ -32,9 +32,10 @@ links = [
 @router.message(F.text.startswith(tuple(links)))
 async def tiktok(message: types.Message) -> None:
     filename = f"{time.time_ns()}-{message.from_user.id}.mp4"
+    mention = f'<a href="tg://user?id={message.from_user.id}">{message.from_user.full_name}</a>'
     await master_handler(
         message=message,
         send_function=message.answer_video,
         download_function=lambda: download_tiktok(message.text, filename),
-        caption=f'<a href="{message.text}">Source</a>\nUploaded by {message.from_user.get_mention()}'
+        caption=f'<a href="{message.text}">Source</a>\nUploaded by {mention}'
     )
