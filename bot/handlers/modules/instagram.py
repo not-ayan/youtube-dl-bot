@@ -34,6 +34,6 @@ async def instagram(message: types.Message) -> None:
     mention = f'<a href="tg://user?id={message.from_user.id}">{message.from_user.full_name}</a>'
     await master_handler(
         message=message,
-        send_function=lambda msg, fn: send_instagram_images(msg, get_instagram_images(fn), f'<a href="{message.text}">Source</a>\n\nUploaded by {mention}'),
+        send_function=lambda msg, fn: send_instagram_images(msg, get_instagram_images(fn), f'<a href="{message.text}">Source</a>\nShared by {mention}'),
         download_function=lambda: download_instagram_post(message.text, filename),
     )

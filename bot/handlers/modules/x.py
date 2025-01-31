@@ -63,7 +63,7 @@ async def x(message: types.Message) -> None:
             message=message,
             send_function=message.answer_video,
             download_function=lambda: download_x(message.text, filename),
-            caption=f'<a href="{message.text}">Source</a>\n\nUploaded by {mention}'
+            caption=f'<a href="{message.text}">Source</a>\nShared by {mention}'
         )
 
 @router.callback_query(lambda c: c.data.startswith(tuple(links)))
@@ -76,5 +76,5 @@ async def x2(callback: types.CallbackQuery) -> None:
         message=callback.message,
         send_function=callback.message.answer_video,
         download_function=lambda: download_x(data[0], filename, int(data[-1])),
-        caption=f'<a href="{data[0]}">Source</a>\nUploaded by {mention}'
+        caption=f'<a href="{data[0]}">Source</a>\nShared by {mention}'
     )

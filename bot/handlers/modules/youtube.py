@@ -55,7 +55,7 @@ async def youtube(message: types.Message) -> None:
                 message=message,
                 send_function=message.answer_video,
                 download_function=lambda: download_youtube(message.text, filename, "fhd"),
-                caption=f'<a href="{message.text}">Source</a>\n\nUploaded by {mention}'
+                caption=f'<a href="{message.text}">Source</a>\nShared by {mention}'
             )
         else:
             await message.answer_photo(
