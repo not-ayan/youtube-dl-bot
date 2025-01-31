@@ -1,7 +1,6 @@
 import json
 import re
 import time
-import os
 
 import yt_dlp
 from aiogram import F, Router, types, exceptions
@@ -24,35 +23,8 @@ def download_x(url: str, filename: str, video_index: int = 0) -> str:
         info = ydl.extract_info(url, download=False)
         if "entries" in info:
             url = info["entries"][video_index]["url"]
-        elif "url" in info:
-            url = info["url"]
-        else:
-            raise yt_dlp.utils.DownloadError("No video or image could be found in this tweet.")
         ydl.download([url])
     return filename
-
-
-def download_x_images(url: str) -> list:
-    with yt_dlp.YoutubeDL() as ydl:
-        info = ydl.extract_info(url, download=False)
-        if "entries" in info:
-            return [entry["url"] for entry in info["entries"] if "url" in entry]
-        elif "url" in info:
-            return [info["url"]]
-        else:
-            raise yt_dlp.utils.DownloadError("No image could be found in this tweet.")
-
-
-def download_images(image_urls: list, folder: str = "images") -> list:
-    if not os.path.exists(folder):
-        os.makedirs(folder)
-    downloaded_images = []
-    for i, url in enumerate(image_urls):
-        filename = f"{folder}/{time.time_ns()}-{i}.jpg"
-        with yt_dlp.YoutubeDL({"outtmpl": filename}) as ydl:
-            ydl.download([url])
-        downloaded_images.append(filename)
-    return downloaded_images
 
 
 links = [
@@ -78,21 +50,13 @@ async def x(message: types.Message) -> None:
             pass
         await message.answer("Multiple videos found in the post. Please select which one you want to download", reply_markup=keyboard(count, message.text))
     else:
-        try:
-            filename = f"{time.time_ns()}-{message.from_user.id}.mp4"
-            await master_handler(
-                message=message,
-                send_function=message.answer_video,
-                download_function=lambda: download_x(message.text, filename),
-                caption=f'<a href="{message.text}">Source</a>\n\nUploaded by {mention}'
-            )
-        except yt_dlp.utils.DownloadError:
-            image_urls = download_x_images(message.text)
-            downloaded_images = download_images(image_urls)
-            media = [types.InputMediaPhoto(types.InputFile(image)) for image in downloaded_images]
-            await message.answer_media_group(media)
-            for image in downloaded_images:
-                os.remove(image)
+        filename = f"{time.time_ns()}-{message.from_user.id}.mp4"
+        await master_handler(
+            message=message,
+            send_function=message.answer_video,
+            download_function=lambda: download_x(message.text, filename),
+            caption=f'<a href="{message.text}">Source</a>\n\nUploaded by {mention}'
+        )
 
 
 @router.callback_query(lambda c: c.data.startswith(tuple(links)))
@@ -105,5 +69,5 @@ async def x2(callback: types.CallbackQuery) -> None:
         message=callback.message,
         send_function=callback.message.answer_video,
         download_function=lambda: download_x(data[0], filename, int(data[-1])),
-        caption=f'<a href="{data[0]}">Source</a>\n\nUploaded by {mention}'
+        caption=f'<a href="{data[0]}">Source</a>\nUploaded by {mention}'
     )
