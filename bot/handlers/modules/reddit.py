@@ -15,10 +15,19 @@ load_dotenv()
 def download_reddit_post(url: str, filename: str) -> str:
     logging.info(f"Downloading Reddit post from URL: {url}")
     
+    final_filename = filename
+
+    def postprocessor_hook(d):
+        nonlocal final_filename
+        if d['status'] == 'finished':
+            final_filename = d['filename']
+            logging.info(f"Final filename: {final_filename}")
+
     ydl_opts = {
         'outtmpl': filename,
         'format': 'bestvideo+bestaudio/best',
-        'merge_output_format': 'mp4'
+        'merge_output_format': 'mp4',
+        'postprocessor_hooks': [postprocessor_hook]
     }
     
     try:
@@ -28,13 +37,12 @@ def download_reddit_post(url: str, filename: str) -> str:
         logging.error(f"Error downloading Reddit post: {e}")
         raise ValueError("Requested format is not available. Please try a different format.")
     
-    merged_filename = filename.replace('.jpg', '.mp4')
-    if not os.path.isfile(merged_filename):
-        logging.error(f"File {merged_filename} not found after download.")
+    if not os.path.isfile(final_filename):
+        logging.error(f"File {final_filename} not found after download.")
         raise ValueError("File download failed. Please try again.")
     
-    logging.info(f"File {merged_filename} downloaded successfully.")
-    return merged_filename
+    logging.info(f"File {final_filename} downloaded successfully.")
+    return final_filename
 
 links = [
     "https://www.reddit.com/r/",
