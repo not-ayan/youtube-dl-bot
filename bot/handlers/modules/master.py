@@ -9,7 +9,7 @@ from videoprops import get_video_properties
 
 ERROR_MESSAGES = {
     "size_limit": "Unfortunately, due to Telegram limitations, we cannot send videos larger than 50 megabytes. Attempting to upload the file to filebin.net",
-    "general_error": "An error occurred. Please report the bug to @not_ayan99",
+    "general_error": "An error occurred. Please report the bug to the maintainer",
 }
 
 
