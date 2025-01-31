@@ -1,6 +1,7 @@
 import json
 import re
 import time
+import os
 
 import yt_dlp
 from aiogram import F, Router, types, exceptions
@@ -30,15 +31,28 @@ def download_x(url: str, filename: str, video_index: int = 0) -> str:
         ydl.download([url])
     return filename
 
+
 def download_x_images(url: str) -> list:
     with yt_dlp.YoutubeDL() as ydl:
         info = ydl.extract_info(url, download=False)
         if "entries" in info:
-            return [entry["url"] for entry in info["entries"] if "url" in entry and entry["url"].endswith(('.jpg', '.jpeg', '.png'))]
-        elif "url" in info and info["url"].endswith(('.jpg', '.jpeg', '.png')):
+            return [entry["url"] for entry in info["entries"] if "url" in entry]
+        elif "url" in info:
             return [info["url"]]
         else:
             raise yt_dlp.utils.DownloadError("No image could be found in this tweet.")
+
+
+def download_images(image_urls: list, folder: str = "images") -> list:
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    downloaded_images = []
+    for i, url in enumerate(image_urls):
+        filename = f"{folder}/{time.time_ns()}-{i}.jpg"
+        with yt_dlp.YoutubeDL({"outtmpl": filename}) as ydl:
+            ydl.download([url])
+        downloaded_images.append(filename)
+    return downloaded_images
 
 
 links = [
@@ -74,8 +88,11 @@ async def x(message: types.Message) -> None:
             )
         except yt_dlp.utils.DownloadError:
             image_urls = download_x_images(message.text)
-            media = [types.InputMediaPhoto(url) for url in image_urls]
+            downloaded_images = download_images(image_urls)
+            media = [types.InputMediaPhoto(types.InputFile(image)) for image in downloaded_images]
             await message.answer_media_group(media)
+            for image in downloaded_images:
+                os.remove(image)
 
 
 @router.callback_query(lambda c: c.data.startswith(tuple(links)))
