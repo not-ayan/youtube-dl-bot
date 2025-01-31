@@ -83,6 +83,7 @@ Once the bot is running, simply send it a link to the media you want to download
 - **YouTube**: Send a YouTube video or shorts link.
 - **Instagram**: Send an Instagram post or reel link.
 - **Reddit**: Send a Reddit video link.
+- **Twitter**: Send a Twitter video link.
 
 The bot will automatically detect the platform and download the media for you.
 
@@ -95,7 +96,7 @@ The bot will automatically detect the platform and download the media for you.
 | YouTube        | ✔️     | ❌     | Supports shorts and videos. |
 | Instagram      | ✔️     | ✔️     | Works with posts and reels.    |
 | Reddit         | ✔️     | ❌     | Photos not supported.          |
-| X (Twitter)    | ✔️     | ❌     | Not currently supported.       |
+| X (Twitter)    | ✔️     | ❌     | Photos not supported.       |
 
 ---
 
