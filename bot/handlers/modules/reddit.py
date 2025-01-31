@@ -1,6 +1,6 @@
 import time
 import praw
-import requests
+import yt_dlp
 import os
 import logging
 from aiogram import F, Router, types, exceptions
@@ -30,23 +30,17 @@ reddit = praw.Reddit(
 
 def download_reddit_post(url: str, filename: str) -> str:
     logging.info(f"Downloading Reddit post from URL: {url}")
-    logging.info(f"Reddit object type: {type(reddit)}")
     submission = reddit.submission(url=url)
-    if submission.is_video:
-        video_url = submission.media['reddit_video']['fallback_url']
-        logging.info(f"Downloading video from URL: {video_url}")
-        response = requests.get(video_url)
-        with open(filename, 'wb') as f:
-            f.write(response.content)
-    elif submission.url.endswith(('.jpg', '.jpeg', '.png', '.gif')):
-        image_url = submission.url
-        logging.info(f"Downloading image from URL: {image_url}")
-        response = requests.get(image_url)
-        with open(filename, 'wb') as f:
-            f.write(response.content)
-    else:
-        logging.error("Submission is neither a video nor an image.")
-        raise ValueError("Submission is neither a video nor an image.")
+    media_url = submission.url if not submission.is_video else submission.media['reddit_video']['fallback_url']
+    
+    ydl_opts = {
+        'outtmpl': filename,
+        'format': 'best'
+    }
+    
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([media_url])
+    
     return filename
 
 links = [
