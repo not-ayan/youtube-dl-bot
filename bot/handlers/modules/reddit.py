@@ -17,11 +17,16 @@ def download_reddit_post(url: str, filename: str) -> str:
     
     ydl_opts = {
         'outtmpl': filename,
-        'format': 'best'
+        'format': 'best',
+        'listformats': True
     }
     
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        ydl.download([url])
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([url])
+    except yt_dlp.utils.DownloadError as e:
+        logging.error(f"Error downloading Reddit post: {e}")
+        raise ValueError("Requested format is not available. Please try a different format.")
     
     return filename
 
