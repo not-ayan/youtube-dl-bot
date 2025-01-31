@@ -17,8 +17,8 @@ def download_reddit_post(url: str, filename: str) -> str:
     
     ydl_opts = {
         'outtmpl': filename,
-        'format': 'best',
-        'listformats': True
+        'format': 'bestvideo+bestaudio/best',
+        'merge_output_format': 'mp4'
     }
     
     try:
@@ -27,6 +27,9 @@ def download_reddit_post(url: str, filename: str) -> str:
     except yt_dlp.utils.DownloadError as e:
         logging.error(f"Error downloading Reddit post: {e}")
         raise ValueError("Requested format is not available. Please try a different format.")
+    
+    if not os.path.isfile(filename):
+        raise ValueError("File download failed. Please try again.")
     
     return filename
 
