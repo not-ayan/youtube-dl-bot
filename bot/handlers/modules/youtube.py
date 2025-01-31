@@ -54,7 +54,7 @@ async def youtube(message: types.Message) -> None:
                 message=message,
                 send_function=message.answer_video,
                 download_function=lambda: download_youtube(message.text, filename, "fhd"),
-                caption=f'<a href="{message.text}">Source</a>\nUploaded by {message.from_user.mention}'
+                caption=f'<a href="{message.text}">Source</a>\nUploaded by {message.from_user.get_mention()}'
             )
         else:
             await message.answer_photo(
@@ -77,5 +77,5 @@ async def process_download(callback: types.CallbackQuery) -> None:
         message=callback.message,
         send_function=callback.message.answer_video if quality != "audio" else callback.message.answer_audio,
         download_function=lambda: download_youtube(url, filename, quality),
-        caption=f'<a href="{url}">Source</a>\nUploaded by {callback.from_user.mention}'
+        caption=f'<a href="{url}">Source</a>\nUploaded by {callback.from_user.get_mention()}'
     )

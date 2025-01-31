@@ -51,7 +51,7 @@ async def x(message: types.Message) -> None:
             message=message,
             send_function=message.answer_video,
             download_function=lambda: download_x(message.text, filename),
-            caption=f'<a href="{message.text}">Source</a>\nUploaded by {message.from_user.mention}'
+            caption=f'<a href="{message.text}">Source</a>\nUploaded by {message.from_user.get_mention()}'
         )
 
 
@@ -64,5 +64,5 @@ async def x2(callback: types.CallbackQuery) -> None:
         message=callback.message,
         send_function=callback.message.answer_video,
         download_function=lambda: download_x(data[0], filename, int(data[-1])),
-        caption=f'<a href="{data[0]}">Source</a>\nUploaded by {callback.from_user.mention}'
+        caption=f'<a href="{data[0]}">Source</a>\nUploaded by {callback.from_user.get_mention()}'
     )

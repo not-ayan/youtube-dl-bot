@@ -36,5 +36,5 @@ async def tiktok(message: types.Message) -> None:
         message=message,
         send_function=message.answer_video,
         download_function=lambda: download_tiktok(message.text, filename),
-        caption=f'<a href="{message.text}">Source</a>\nUploaded by {message.from_user.mention}'
+        caption=f'<a href="{message.text}">Source</a>\nUploaded by {message.from_user.get_mention()}'
     )
