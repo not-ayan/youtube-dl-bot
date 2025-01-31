@@ -37,10 +37,10 @@ links = [
 
 def keyboard(url: str) -> types.InlineKeyboardMarkup:
     kb = [
-        [types.InlineKeyboardButton(text="📹 Full HD (1080p) (Долго)", callback_data=f"{url}!fhd")],
-        [types.InlineKeyboardButton(text="📹 HD (720p) (Быстро)", callback_data=f"{url}!hd")],
-        [types.InlineKeyboardButton(text="📹 SD (480p) (Быстро)", callback_data=f"{url}!sd")],
-        [types.InlineKeyboardButton(text="🎵 Только аудио", callback_data=f"{url}!audio")],
+        [types.InlineKeyboardButton(text="📹 Full HD (1080p) (Slow)", callback_data=f"{url}!fhd")],
+        [types.InlineKeyboardButton(text="📹 HD (720p) (Fast)", callback_data=f"{url}!hd")],
+        [types.InlineKeyboardButton(text="📹 SD (480p) (Fast)", callback_data=f"{url}!sd")],
+        [types.InlineKeyboardButton(text="🎵 Audio only", callback_data=f"{url}!audio")],
     ]
     return types.InlineKeyboardMarkup(inline_keyboard=kb)
 
@@ -48,14 +48,23 @@ def keyboard(url: str) -> types.InlineKeyboardMarkup:
 @router.message(F.text.startswith(tuple(links)))
 async def youtube(message: types.Message) -> None:
     try:
-        await message.answer_photo(
-            photo=Video(message.text).thumbnail_url,
-            caption="Выберите качество загрузки:",
-            reply_markup=keyboard(message.text),
-        )
+        if any(short in message.text for short in ["https://www.youtube.com/shorts/", "https://youtube.com/shorts/"]):
+            filename = f"{time.time_ns()}-{message.from_user.id}.mp4"
+            await master_handler(
+                message=message,
+                send_function=message.answer_video,
+                download_function=lambda: download_youtube(message.text, filename, "fhd"),
+                caption=f'<a href="{message.text}">Source</a>\nUploaded by {message.from_user.mention}'
+            )
+        else:
+            await message.answer_photo(
+                photo=Video(message.text).thumbnail_url,
+                caption="Select download quality:",
+                reply_markup=keyboard(message.text),
+            )
         await message.delete()
     except Exception as e:
-        await message.answer(f"Ошибка при получении информации о видео: {str(e)}")
+        await message.answer(f"Error retrieving video information: {str(e)}")
 
 
 @router.callback_query(lambda c: c.data.startswith(tuple(links)))
@@ -68,4 +77,5 @@ async def process_download(callback: types.CallbackQuery) -> None:
         message=callback.message,
         send_function=callback.message.answer_video if quality != "audio" else callback.message.answer_audio,
         download_function=lambda: download_youtube(url, filename, quality),
+        caption=f'<a href="{url}">Source</a>\nUploaded by {callback.from_user.mention}'
     )

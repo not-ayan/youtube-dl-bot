@@ -8,8 +8,8 @@ from tenacity import retry, retry_if_exception_type, stop, stop_after_attempt
 from videoprops import get_video_properties
 
 ERROR_MESSAGES = {
-    "size_limit": "К сожалению, из-за ограничений телеграма, мы не можем отправлять видео больше 50 мегабайт. Попытка выложить файл на filebin.net",
-    "general_error": "Произошла ошибка. Просим сообщить о баге @anekobtw",
+    "size_limit": "Unfortunately, due to Telegram limitations, we cannot send videos larger than 50 megabytes. Attempting to upload the file to filebin.net",
+    "general_error": "An error occurred. Please report the bug to @not_ayan99",
 }
 
 
@@ -36,17 +36,18 @@ async def master_handler(
     message: types.Message,
     send_function: Callable,
     download_function: Callable,
+    caption: str = ""
 ) -> None:
-    status_msg = await message.answer("Файл подготавливается. Пожалуйста, подождите немного.")
+    status_msg = await message.answer("The file is being prepared. Please wait a moment.")
 
     try:
         filename = await async_download(download_function)
 
         if filename.endswith(".mp4"):
             props = get_video_properties(filename)
-            await send_function(types.FSInputFile(filename), caption="@free_yt_dl_bot", height=props["height"], width=props["width"])
+            await send_function(types.FSInputFile(filename), caption=caption, height=props["height"], width=props["width"])
         else:
-            await send_function(types.FSInputFile(filename), caption="@free_yt_dl_bot")
+            await send_function(types.FSInputFile(filename), caption=caption)
 
     except exceptions.TelegramEntityTooLarge:
         await status_msg.edit_text(ERROR_MESSAGES["size_limit"])

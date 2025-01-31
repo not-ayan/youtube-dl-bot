@@ -44,13 +44,14 @@ async def x(message: types.Message) -> None:
 
     if count > 1:
         await message.delete()
-        await message.answer("В публикации найдено несколько видео. Пожалуйста, выберите какое именно хотите скачать", reply_markup=keyboard(count, message.text))
+        await message.answer("Multiple videos found in the post. Please select which one you want to download", reply_markup=keyboard(count, message.text))
     else:
         filename = f"{time.time_ns()}-{message.from_user.id}.mp4"
         await master_handler(
             message=message,
             send_function=message.answer_video,
             download_function=lambda: download_x(message.text, filename),
+            caption=f'<a href="{message.text}">Source</a>\nUploaded by {message.from_user.mention}'
         )
 
 
@@ -63,4 +64,5 @@ async def x2(callback: types.CallbackQuery) -> None:
         message=callback.message,
         send_function=callback.message.answer_video,
         download_function=lambda: download_x(data[0], filename, int(data[-1])),
+        caption=f'<a href="{data[0]}">Source</a>\nUploaded by {callback.from_user.mention}'
     )
