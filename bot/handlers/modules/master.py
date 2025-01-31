@@ -69,4 +69,8 @@ async def master_handler(
     else:
         await message.delete()
         await status_msg.delete()
-        os.remove(filename)
+        if os.path.isfile(filename):
+            os.remove(filename)
+        elif os.path.isdir(filename):
+            import shutil
+            shutil.rmtree(filename)
