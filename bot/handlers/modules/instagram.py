@@ -25,7 +25,7 @@ links = [
 ]
 
 async def send_instagram_images(message: types.Message, images: list, caption: str) -> None:
-    media = [types.InputMediaPhoto(types.FSInputFile(image), caption=caption if i == 0 else "") for i, image in enumerate(images)]
+    media = [types.InputMediaPhoto(media=types.FSInputFile(image), caption=caption if i == 0 else "") for i, image in enumerate(images)]
     await message.answer_media_group(media)
 
 @router.message(F.text.startswith(tuple(links)))
