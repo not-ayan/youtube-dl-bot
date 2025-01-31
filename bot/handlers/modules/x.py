@@ -34,8 +34,8 @@ def download_x_images(url: str) -> list:
     with yt_dlp.YoutubeDL() as ydl:
         info = ydl.extract_info(url, download=False)
         if "entries" in info:
-            return [entry["url"] for entry in info["entries"] if "url" in entry]
-        elif "url" in info:
+            return [entry["url"] for entry in info["entries"] if "url" in entry and entry["url"].endswith(('.jpg', '.jpeg', '.png'))]
+        elif "url" in info and info["url"].endswith(('.jpg', '.jpeg', '.png')):
             return [info["url"]]
         else:
             raise yt_dlp.utils.DownloadError("No image could be found in this tweet.")
