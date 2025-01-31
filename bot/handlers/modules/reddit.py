@@ -29,8 +29,10 @@ def download_reddit_post(url: str, filename: str) -> str:
         raise ValueError("Requested format is not available. Please try a different format.")
     
     if not os.path.isfile(filename):
+        logging.error(f"File {filename} not found after download.")
         raise ValueError("File download failed. Please try again.")
     
+    logging.info(f"File {filename} downloaded successfully.")
     return filename
 
 links = [
