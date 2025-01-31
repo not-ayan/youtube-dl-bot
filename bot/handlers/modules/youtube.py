@@ -82,5 +82,5 @@ async def process_download(callback: types.CallbackQuery) -> None:
         message=callback.message,
         send_function=callback.message.answer_video if quality != "audio" else callback.message.answer_audio,
         download_function=lambda: download_youtube(url, filename, quality),
-        caption=f'<a href="{url}">Source</a>\n\nUploaded by {mention}'
+        caption=f'<a href="{url}">Source</a>\nUploaded by {mention}'
     )
