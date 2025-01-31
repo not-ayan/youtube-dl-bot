@@ -64,7 +64,17 @@ async def x(message: types.Message) -> None:
             pass
         await message.answer("Multiple videos found in the post. Please select which one you want to download", reply_markup=keyboard(count, message.text))
     elif count == 0:
-        await message.answer("No video could be found in this tweet.")
+        try:
+            filename = f"{time.time_ns()}-{message.from_user.id}.jpg"
+            await master_handler(
+                message=message,
+                send_function=message.answer_photo,
+                download_function=lambda: download_x(message.text, filename),
+                caption=f'<a href="{message.text}">Source</a>\n\nUploaded by {mention}'
+            )
+        except Exception as e:
+            logging.error(f"Error downloading Twitter post: {e}")
+            await message.answer(f"Error downloading Twitter post: {e}")
     else:
         filename = f"{time.time_ns()}-{message.from_user.id}.mp4"
         await master_handler(
