@@ -4,7 +4,6 @@ import time
 import yt_dlp
 import os
 import logging
-import subprocess
 from aiogram import F, Router, types, exceptions
 
 from handlers.modules.master import master_handler
@@ -30,17 +29,12 @@ def download_x(url: str, filename: str, video_index: int = 0) -> str:
                 url = info["entries"][video_index]["url"]
             ydl.download([url])
     except yt_dlp.utils.DownloadError as e:
-        logging.error(f"yt-dlp failed: {e}. Trying gallery-dl...")
-        result = subprocess.run(["gallery-dl", "--dest", os.path.dirname(filename), url], capture_output=True, text=True)
-        if result.returncode != 0:
-            logging.error(f"gallery-dl failed: {result.stderr}")
-            raise ValueError("Both yt-dlp and gallery-dl failed to download the media.")
-        else:
-            downloaded_files = [f for f in os.listdir(os.path.dirname(filename)) if f.startswith(os.path.basename(filename).split('.')[0])]
-            if downloaded_files:
-                filename = os.path.join(os.path.dirname(filename), downloaded_files[0])
-            else:
-                raise ValueError("gallery-dl did not download any files.")
+        logging.error(f"yt-dlp failed: {e}")
+        raise ValueError("yt-dlp failed to download the media.")
+    
+    if not os.path.isfile(filename):
+        raise ValueError("File download failed. Please try again.")
+    
     return filename
 
 links = [
@@ -49,7 +43,7 @@ links = [
 ]
 
 def keyboard(number: int, url: str) -> types.InlineKeyboardMarkup:
-    kb = [[types.InlineKeyboardButton(text=f"Видео {i+1}", callback_data=f"{url}!{i}")] for i in range(number)]
+    kb = [[types.InlineKeyboardButton(text=f"Video {i+1}", callback_data=f"{url}!{i}")] for i in range(number)]
     return types.InlineKeyboardMarkup(inline_keyboard=kb)
 
 @router.message(F.text.startswith(tuple(links)))
@@ -63,18 +57,6 @@ async def x(message: types.Message) -> None:
         except exceptions.TelegramBadRequest:
             pass
         await message.answer("Multiple videos found in the post. Please select which one you want to download", reply_markup=keyboard(count, message.text))
-    elif count == 0:
-        try:
-            filename = f"{time.time_ns()}-{message.from_user.id}.jpg"
-            await master_handler(
-                message=message,
-                send_function=message.answer_photo,
-                download_function=lambda: download_x(message.text, filename),
-                caption=f'<a href="{message.text}">Source</a>\n\nUploaded by {mention}'
-            )
-        except Exception as e:
-            logging.error(f"Error downloading Twitter post: {e}")
-            await message.answer(f"Error downloading Twitter post: {e}")
     else:
         filename = f"{time.time_ns()}-{message.from_user.id}.mp4"
         await master_handler(
