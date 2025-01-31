@@ -14,17 +14,22 @@ router = Router()
 load_dotenv()
 
 # Initialize PRAW with your Reddit app credentials
+reddit_client_id = os.getenv('REDDIT_CLIENT_ID')
+reddit_client_secret = os.getenv('REDDIT_CLIENT_SECRET')
+reddit_user_agent = os.getenv('REDDIT_USER_AGENT')
+
+logging.info(f"Reddit client ID: {reddit_client_id}")
+logging.info(f"Reddit client secret: {reddit_client_secret}")
+logging.info(f"Reddit user agent: {reddit_user_agent}")
+
 reddit = praw.Reddit(
-    client_id=os.getenv('REDDIT_CLIENT_ID'),
-    client_secret=os.getenv('REDDIT_CLIENT_SECRET'),
-    user_agent=os.getenv('REDDIT_USER_AGENT')
+    client_id=reddit_client_id,
+    client_secret=reddit_client_secret,
+    user_agent=reddit_user_agent
 )
 
 def download_reddit_post(url: str, filename: str) -> str:
     logging.info(f"Downloading Reddit post from URL: {url}")
-    logging.info(f"Reddit client ID: {os.getenv('REDDIT_CLIENT_ID')}")
-    logging.info(f"Reddit client secret: {os.getenv('REDDIT_CLIENT_SECRET')}")
-    logging.info(f"Reddit user agent: {os.getenv('REDDIT_USER_AGENT')}")
     logging.info(f"Reddit object type: {type(reddit)}")
     submission = reddit.submission(url=url)
     if submission.is_video:
