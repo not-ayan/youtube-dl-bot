@@ -15,26 +15,11 @@ load_dotenv()
 def download_reddit_post(url: str, filename: str) -> str:
     logging.info(f"Downloading Reddit post from URL: {url}")
     
-    # Determine if the download is for a video or an image based on the filename extension
-    if filename.endswith('.mp4'):
-        ydl_opts = {
-            'outtmpl': filename,
-            'format': 'bestvideo+bestaudio/best',
-            'merge_output_format': 'mp4',
-            'postprocessors': [{
-                'key': 'FFmpegVideoConvertor',
-                'preferedformat': 'mp4',
-            }],
-            'quiet': True,
-            'noprogress': True,
-        }
-    else:
-        ydl_opts = {
-            'outtmpl': filename,
-            'format': 'best',
-            'quiet': True,
-            'noprogress': True,
-        }
+    ydl_opts = {
+        'outtmpl': filename,
+        'format': 'bestvideo+bestaudio/best',
+        'merge_output_format': 'mp4'
+    }
     
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -44,7 +29,6 @@ def download_reddit_post(url: str, filename: str) -> str:
         raise ValueError("Requested format is not available. Please try a different format.")
     
     if not os.path.isfile(filename):
-        logging.error("File download failed. Please try again.")
         raise ValueError("File download failed. Please try again.")
     
     return filename
