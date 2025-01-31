@@ -12,9 +12,21 @@ def download_instagram_post(url: str, filename: str) -> str:
     L.download_post(post, target=filename)
     return filename
 
+def get_instagram_images(filename: str) -> list:
+    import os
+    images = []
+    for file in os.listdir(filename):
+        if file.endswith(".jpg"):
+            images.append(os.path.join(filename, file))
+    return images
+
 links = [
     "https://www.instagram.com/p/",
 ]
+
+async def send_instagram_images(message: types.Message, images: list, caption: str) -> None:
+    media = [types.InputMediaPhoto(types.FSInputFile(image), caption=caption if i == 0 else "") for i, image in enumerate(images)]
+    await message.answer_media_group(media)
 
 @router.message(F.text.startswith(tuple(links)))
 async def instagram(message: types.Message) -> None:
@@ -22,7 +34,6 @@ async def instagram(message: types.Message) -> None:
     mention = f'<a href="tg://user?id={message.from_user.id}">{message.from_user.full_name}</a>'
     await master_handler(
         message=message,
-        send_function=message.answer_photo,
+        send_function=lambda msg: send_instagram_images(msg, get_instagram_images(filename), f'<a href="{message.text}">Source</a>\n\nUploaded by {mention}'),
         download_function=lambda: download_instagram_post(message.text, filename),
-        caption=f'<a href="{message.text}">Source</a>\n\nUploaded by {mention}'
     )
