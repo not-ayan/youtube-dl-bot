@@ -1,7 +1,7 @@
 import time
 
 import yt_dlp
-from aiogram import F, Router, types
+from aiogram import F, Router, types, exceptions
 from youthon import Video
 
 from handlers.modules.master import master_handler
@@ -55,7 +55,7 @@ async def youtube(message: types.Message) -> None:
                 message=message,
                 send_function=message.answer_video,
                 download_function=lambda: download_youtube(message.text, filename, "fhd"),
-                caption=f'<a href="{message.text}">Source</a>\nUploaded by {mention}'
+                caption=f'<a href="{message.text}">Source</a>\n\nUploaded by {mention}'
             )
         else:
             await message.answer_photo(
@@ -63,7 +63,10 @@ async def youtube(message: types.Message) -> None:
                 caption="Select download quality:",
                 reply_markup=keyboard(message.text),
             )
-        await message.delete()
+        try:
+            await message.delete()
+        except exceptions.TelegramBadRequest:
+            pass
     except Exception as e:
         await message.answer(f"Error retrieving video information: {str(e)}")
 

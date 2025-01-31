@@ -3,7 +3,7 @@ import re
 import time
 
 import yt_dlp
-from aiogram import F, Router, types
+from aiogram import F, Router, types, exceptions
 
 from handlers.modules.master import master_handler
 
@@ -38,13 +38,16 @@ def keyboard(number: int, url: str) -> types.InlineKeyboardMarkup:
     return types.InlineKeyboardMarkup(inline_keyboard=kb)
 
 
-@router.message(F.text.startswith(tuple(links)))
+@router.message(lambda message: any(message.text.lower().startswith(link) for link in links))
 async def x(message: types.Message) -> None:
     mention = f'<a href="tg://user?id={message.from_user.id}">{message.from_user.full_name}</a>'
     count = vids_count(message.text)
 
     if count > 1:
-        await message.delete()
+        try:
+            await message.delete()
+        except exceptions.TelegramBadRequest:
+            pass
         await message.answer("Multiple videos found in the post. Please select which one you want to download", reply_markup=keyboard(count, message.text))
     else:
         filename = f"{time.time_ns()}-{message.from_user.id}.mp4"
@@ -52,7 +55,7 @@ async def x(message: types.Message) -> None:
             message=message,
             send_function=message.answer_video,
             download_function=lambda: download_x(message.text, filename),
-            caption=f'<a href="{message.text}">Source</a>\nUploaded by {mention}'
+            caption=f'<a href="{message.text}">Source</a>\n\nUploaded by {mention}'
         )
 
 
