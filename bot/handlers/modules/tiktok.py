@@ -8,17 +8,17 @@ from handlers.modules.master import master_handler
 router = Router()
 
 
-def download_tiktok(url: str, filename: str) -> str:
+def download_tiktok(url: str, filename: str) -> tuple:
     opts = {
         "format": "best",
         "outtmpl": filename,
         "http_headers": {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/91.0.4472.124 Safari/537.36"},
     }
+    original_caption = ""
     with yt_dlp.YoutubeDL(opts) as yt:
         info = yt.extract_info(url, download=False)
         original_caption = info.get('description', '')
         yt.download([url])
-    return filename, original_caption
 
 
 links = [

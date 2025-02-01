@@ -27,9 +27,9 @@ def get_ydl_opts(quality: str, filename: str) -> dict:
         opts["cookiefile"] = COOKIES_FILE
     return {**opts, **formats[quality]}
 
-def download_youtube(url: str, filename: str, quality: str) -> str:
+def download_youtube(url: str, filename: str, quality: str) -> tuple:
     fname = filename[:-4] if quality in ["best", "fhd", "audio"] else filename
-    with yt_dlp.YoutubeDL(get_ydl_opts(quality, fname)) as ydl:
+    original_caption = ""
         info = ydl.extract_info(url, download=False)
         original_caption = info.get('description', '')
         ydl.download([url])
