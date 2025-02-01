@@ -2,6 +2,7 @@ import os
 import time
 import logging
 import subprocess
+import glob
 import yt_dlp
 from aiogram import F, Router, types, exceptions
 
@@ -9,25 +10,38 @@ from handlers.modules.master import master_handler
 
 router = Router()
 
-def gallery_dl_download(url: str, filename: str) -> str:
-    dest_dir = os.path.dirname(filename)
-    os.makedirs(dest_dir, exist_ok=True)
-    cmd = ["gallery-dl", "--dest", dest_dir, url]
-    process = subprocess.run(cmd, capture_output=True, text=True)
-    if process.returncode != 0:
-        logging.error(f"gallery-dl failed: {process.stderr}")
-        raise ValueError("gallery-dl failed to download the media.")
-    
-    downloaded_files = []
-    for root, _, files in os.walk(dest_dir):
-        for file in files:
-            if file.lower().endswith((".jpg", ".jpeg", ".png", ".gif", ".mp4")):
-                downloaded_files.append(os.path.join(root, file))
-    
-    if not downloaded_files:
-        raise ValueError("No files were downloaded with gallery-dl.")
-    
-    return downloaded_files[0]
+class GalleryDL:
+    def __init__(self, url: str, download_dir: str):
+        self.url = url
+        self.download_dir = download_dir
+        self.extraction_success = False
+        self.grouped_media = []
+        self.single_media = None
+
+    async def scrape(self):
+        os.makedirs(self.download_dir, exist_ok=True)
+        cmd = f"gallery-dl -q --range '0-4' -D {self.download_dir} '{self.url}'"
+        process = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+        if process.returncode != 0:
+            logging.error(f"gallery-dl failed: {process.stderr}")
+            raise ValueError("gallery-dl failed to download the media.")
+
+        files_list = glob.glob(f"{self.download_dir}/*")
+        if not files_list:
+            self.clean_downloads()
+            return
+
+        self.extraction_success = True
+        if len(files_list) > 1:
+            self.grouped_media = files_list
+        else:
+            self.single_media = files_list[0]
+
+    def clean_downloads(self):
+        if os.path.exists(self.download_dir):
+            for file in os.listdir(self.download_dir):
+                os.remove(os.path.join(self.download_dir, file))
+            os.rmdir(self.download_dir)
 
 def yt_dlp_download(url: str, filename: str) -> str:
     opts = {
@@ -39,8 +53,15 @@ def yt_dlp_download(url: str, filename: str) -> str:
     return filename
 
 def download_x(url: str, filename: str) -> str:
+    download_dir = os.path.dirname(filename)
+    gallery_dl = GalleryDL(url, download_dir)
     try:
-        return gallery_dl_download(url, filename)
+        gallery_dl.scrape()
+        if gallery_dl.extraction_success:
+            if gallery_dl.single_media:
+                return gallery_dl.single_media
+            elif gallery_dl.grouped_media:
+                return gallery_dl.grouped_media[0]  # Return the first file for simplicity
     except Exception as e:
         logging.error(f"gallery-dl failed: {e}. Trying yt-dlp...")
         return yt_dlp_download(url, filename)
@@ -53,7 +74,7 @@ links = [
 @router.message(F.text.startswith(tuple(links)))
 async def x(message: types.Message) -> None:
     mention = f'<a href="tg://user?id={message.from_user.id}">{message.from_user.full_name}</a>'
-    filename = f"{time.time_ns()}-{message.from_user.id}.mp4"
+    filename = f"downloads/{time.time_ns()}-{message.from_user.id}.mp4"
     await master_handler(
         message=message,
         send_function=message.answer_video,
@@ -65,7 +86,7 @@ async def x(message: types.Message) -> None:
 async def x2(callback: types.CallbackQuery) -> None:
     mention = f'<a href="tg://user?id={callback.from_user.id}">{callback.from_user.full_name}</a>'
     data = callback.data.split("!")
-    filename = f"{time.time_ns()}-{callback.message.from_user.id}.mp4"
+    filename = f"downloads/{time.time_ns()}-{callback.message.from_user.id}.mp4"
 
     await master_handler(
         message=callback.message,
