@@ -21,12 +21,10 @@ def vids_count(url: str) -> int:
             return len(info["entries"])
         return 1
 
-def download_x(url: str, filename: str, video_index: int = 0) -> tuple:
-    original_caption = ""
+def download_x(url: str, filename: str, video_index: int = 0) -> str:
     try:
         with yt_dlp.YoutubeDL({"outtmpl": filename, "format": "best"}) as ydl:
             info = ydl.extract_info(url, download=False)
-            original_caption = info.get('description', '')
             if "entries" in info:
                 url = info["entries"][video_index]["url"]
             ydl.download([url])
@@ -37,7 +35,7 @@ def download_x(url: str, filename: str, video_index: int = 0) -> tuple:
     if not os.path.isfile(filename):
         raise ValueError("File download failed. Please try again.")
     
-    return filename, original_caption
+    return filename
 
 links = [
     "https://x.com/",
@@ -64,11 +62,11 @@ async def x(message: types.Message) -> None:
         await message.answer("Multiple videos found in the post. Please select which one you want to download", reply_markup=keyboard(count, message.text))
     else:
         filename = f"{time.time_ns()}-{message.from_user.id}.mp4"
-        filename, original_caption = await master_handler(
+        await master_handler(
             message=message,
             send_function=message.answer_video,
             download_function=lambda: download_x(message.text, filename),
-            caption=f'{original_caption}\n\n<a href="{message.text}">Source</a>\n\nShared by {mention}'
+            caption=f'<a href="{message.text}">Source</a>\nShared by {mention}'
         )
 
 @router.callback_query(lambda c: c.data.startswith(tuple(links)))
@@ -77,9 +75,9 @@ async def x2(callback: types.CallbackQuery) -> None:
     data = callback.data.split("!")
     filename = f"{time.time_ns()}-{callback.message.from_user.id}.mp4"
 
-    filename, original_caption = await master_handler(
+    await master_handler(
         message=callback.message,
         send_function=callback.message.answer_video,
         download_function=lambda: download_x(data[0], filename, int(data[-1])),
-        caption=f'{original_caption}\n\n<a href="{data[0]}">Source</a>\nUploaded by {mention}'
+        caption=f'<a href="{data[0]}">Source</a>\nShared by {mention}'
     )

@@ -6,12 +6,11 @@ from handlers.modules.master import master_handler
 
 router = Router()
 
-def download_instagram_post(url: str, filename: str) -> tuple:
+def download_instagram_post(url: str, filename: str) -> str:
     L = instaloader.Instaloader(download_videos=False, download_video_thumbnails=False, download_comments=False)
     post = instaloader.Post.from_shortcode(L.context, url.split("/")[-2])
-    original_caption = post.caption
     L.download_post(post, target=filename)
-    return filename, original_caption
+    return filename
 
 def get_instagram_images(filename: str) -> list:
     import os
@@ -33,8 +32,8 @@ async def send_instagram_images(message: types.Message, images: list, caption: s
 async def instagram(message: types.Message) -> None:
     filename = f"{time.time_ns()}-{message.from_user.id}"
     mention = f'<a href="tg://user?id={message.from_user.id}">{message.from_user.full_name}</a>'
-    filename, original_caption = await master_handler(
+    await master_handler(
         message=message,
-        send_function=lambda msg, fn: send_instagram_images(msg, get_instagram_images(fn), f'{original_caption}\n\n<a href="{message.text}">Source</a>\nShared by {mention}'),
+        send_function=lambda msg, fn: send_instagram_images(msg, get_instagram_images(fn), f'<a href="{message.text}">Source</a>\nShared by {mention}'),
         download_function=lambda: download_instagram_post(message.text, filename),
     )

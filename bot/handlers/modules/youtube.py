@@ -30,7 +30,6 @@ def get_ydl_opts(quality: str, filename: str) -> dict:
 def download_youtube(url: str, filename: str, quality: str) -> str:
     fname = filename[:-4] if quality in ["best", "fhd", "audio"] else filename
     with yt_dlp.YoutubeDL(get_ydl_opts(quality, fname)) as ydl:
-        info = ydl.extract_info(url, download=False)
         ydl.download([url])
     return filename
 
