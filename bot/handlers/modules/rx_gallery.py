@@ -42,7 +42,7 @@ def download_video(url: str, filename: str) -> str:
     
     return filename
 
-@router.message(F.text.regexp(r"(reddit\.com/.*(\.jpg|\.png|\.gif|/comments/|/r/|gallery))|(x\.com/.*photo)"))
+@router.message(F.text.regexp(r"(https?://(www\.)?reddit\.com/r/.*(\.jpg|\.png|\.gif|/comments/|/r/|gallery))|(https?://(www\.)?x\.com/.*photo)"))
 async def rx_gallery_images(message: types.Message) -> None:
     """
     This router looks for possible Reddit or X links containing images.
@@ -72,7 +72,7 @@ async def rx_gallery_images(message: types.Message) -> None:
     except Exception as e:
         await message.answer(f"Error: {e}")
 
-@router.message(F.text.regexp(r"(reddit\.com/.*)|(x\.com/.*)"))
+@router.message(F.text.regexp(r"(https?://(www\.)?reddit\.com/r/.*)|(https?://(www\.)?x\.com/.*)"))
 async def rx_gallery_videos(message: types.Message) -> None:
     """
     This router looks for possible Reddit or X links containing videos.
