@@ -46,7 +46,10 @@ def keyboard(number: int, url: str) -> types.InlineKeyboardMarkup:
     kb = [[types.InlineKeyboardButton(text=f"Video {i+1}", callback_data=f"{url}!{i}")] for i in range(number)]
     return types.InlineKeyboardMarkup(inline_keyboard=kb)
 
-@router.message(F.text.startswith(tuple(links)))
+@router.message(
+    F.text.startswith(tuple(links))
+    & ~F.text.regexp(r'photo|\.jpg|\.jpeg|\.png|\.gif')  # exclude references to images
+)
 async def x(message: types.Message) -> None:
     mention = f'<a href="tg://user?id={message.from_user.id}">{message.from_user.full_name}</a>'
     count = vids_count(message.text)
