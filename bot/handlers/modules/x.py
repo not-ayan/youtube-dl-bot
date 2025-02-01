@@ -21,7 +21,8 @@ def vids_count(url: str) -> int:
             return len(info["entries"])
         return 1
 
-def download_x(url: str, filename: str, video_index: int = 0) -> str:
+def download_x(url: str, filename: str, video_index: int = 0) -> tuple:
+    original_caption = ""
     try:
         with yt_dlp.YoutubeDL({"outtmpl": filename, "format": "best"}) as ydl:
             info = ydl.extract_info(url, download=False)

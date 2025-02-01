@@ -6,7 +6,7 @@ from handlers.modules.master import master_handler
 
 router = Router()
 
-def download_instagram_post(url: str, filename: str) -> str:
+def download_instagram_post(url: str, filename: str) -> tuple:
     L = instaloader.Instaloader(download_videos=False, download_video_thumbnails=False, download_comments=False)
     post = instaloader.Post.from_shortcode(L.context, url.split("/")[-2])
     original_caption = post.caption

@@ -12,10 +12,11 @@ router = Router()
 # Load environment variables
 load_dotenv()
 
-def download_reddit_post(url: str, filename: str) -> str:
+def download_reddit_post(url: str, filename: str) -> tuple:
     logging.info(f"Downloading Reddit post from URL: {url}")
     
     common_filename = "downloaded_reddit_post.mp4"
+    original_caption = ""
 
     ydl_opts = {
         'outtmpl': common_filename,

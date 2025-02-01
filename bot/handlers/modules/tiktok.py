@@ -19,6 +19,7 @@ def download_tiktok(url: str, filename: str) -> tuple:
         info = yt.extract_info(url, download=False)
         original_caption = info.get('description', '')
         yt.download([url])
+    return filename, original_caption
 
 
 links = [
