@@ -1,6 +1,6 @@
 # YouTube-DL Bot 🤖
 
-A versatile Telegram bot for downloading media from various platforms, including YouTube, Instagram, Reddit, and more. Built with Python and `aiogram`, this bot makes it easy to download and share videos, photos, and other media directly in Telegram.
+A versatile Telegram bot for downloading media from various platforms, including YouTube, Instagram, Reddit, Pinterest, and more. Built with Python and `aiogram`, this bot makes it easy to download and share videos, photos, and other media directly in Telegram.
 
 ---
 
@@ -20,6 +20,9 @@ A versatile Telegram bot for downloading media from various platforms, including
 - **X (Twitter) Support**:
   - Download Twitter/x.com videos.
   - *(Note: X (Twitter) photos are not currently supported due to API limitations.)*
+
+- **Pinterest Support**:
+  - Download Pinterest videos.
 
 - **Multi-Platform Compatibility**:
   - Works seamlessly with multiple platforms, providing a unified interface for downloading media.
@@ -91,6 +94,7 @@ Once the bot is running, simply send it a link to the media you want to download
 - **Instagram**: Send an Instagram post or reel link.
 - **Reddit**: Send a Reddit video link.
 - **Twitter**: Send a Twitter video link.
+- **Pinterest**: Send a Pinterest video link.
 
 The bot will automatically detect the platform and download the media for you.
 
@@ -104,6 +108,7 @@ The bot will automatically detect the platform and download the media for you.
 | Instagram      | ✔️     | ✔️     | Works with posts and reels.    |
 | Reddit         | ✔️     | ❌     | Photos not supported.          |
 | X (Twitter)    | ✔️     | ❌     | Photos not supported.       |
+| Pinterest      | ✔️     | ❌     | Videos supported.              |
 
 ---
 

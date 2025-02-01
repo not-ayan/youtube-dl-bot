@@ -3,29 +3,27 @@ from aiogram.filters import Command
 
 router = Router()
 
-
 @router.message(F.text, Command("start"))
 async def start(message: types.Message) -> None:
-    await message.answer(text="Отправь боту ссылку на видео.\nИнструкция по пользованию - /howtouse\n\n<b>Мы не собираем никаких данных о Вас!</b>")
-
+    await message.answer(text="Send a link to the media you want to download.\nFor usage instructions, type /howtouse\n\n<b>We do not collect any data about you!</b>")
 
 @router.message(F.text, Command("howtouse"))
 async def howtouse(message: types.Message) -> None:
     await message.answer(
         text="\n".join(
             (
-                "Бот состоит из разных модулей, каждый из которых отвечает за свою платформу.",
-                "Отправляя ссылку, автоматически определяется из какой соц.сети данная ссылка и запускается модуль именно этой платформы.",
-                "Бот иногда может предлагать разные варианты для скачивания (например, несколько качеств). Просто следуйте инструкциям.",
-                "Если скачивание завершится успешно, то бот удалит ваше сообщение и отправит файл.",
-                "В ином случае, бот отправит только сообщение с ошибкой.",
+                "This bot is an all-in-one media downloader, supporting various platforms.",
+                "When you send a link, the bot automatically detects the platform and initiates the appropriate module.",
+                "The bot may offer different download options (e.g., multiple quality levels). Just follow the instructions.",
+                "If the download is successful, the bot will delete your message and send the file.",
+                "Otherwise, the bot will send an error message.",
                 "",
-                "<b>Важно:</b>",
-                "Пожалуйста, не скачивайте слишком большие видео файлы, так как это может занять много времени и ресурсов.",
-                "Видео с ютуба рекомендуем скачивать длительностью до 5-10 минут для оптимальной работы бота.",
-                "Если видео слишком большое, рекомендуется выбрать более низкое качество.",
+                "<b>Important:</b>",
+                "Please avoid downloading very large video files, as this can take a lot of time and resources.",
+                "For optimal performance, we recommend downloading YouTube videos up to 5-10 minutes in length.",
+                "If the video is too large, consider choosing a lower quality.",
                 "",
-                "Если пост в Х (твиттере) имеет несколько видео, то после ссылки через слеш укажите номер видео, которое хотите скачать (например, для третьего видео {ссылка}/3)",
+                "If a post on X (Twitter) contains multiple videos, specify the video number after the link (e.g., for the third video, use {link}/3).",
             )
         )
     )
