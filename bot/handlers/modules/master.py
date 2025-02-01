@@ -4,7 +4,7 @@ from typing import Any, Callable
 
 import requests
 from aiogram import exceptions, types
-from tenacity import retry, retry_if_exception_type, stop_after_attempt
+from tenacity import retry, retry_if_exception_type, stop, stop_after_attempt
 from videoprops import get_video_properties
 
 ERROR_MESSAGES = {
@@ -12,9 +12,11 @@ ERROR_MESSAGES = {
     "general_error": "An error occurred. Please report the bug to the maintainer",
 }
 
+
 async def async_download(function: Callable) -> Any:
     loop = asyncio.get_event_loop()
     return await loop.run_in_executor(None, function)
+
 
 def publish(filename: str) -> str:
     with open(filename, "rb") as file:
@@ -36,6 +38,7 @@ def publish(filename: str) -> str:
     res = response.json()
     return f"https://filebin.net/{res['bin']['id']}/{res['file']['filename']}"
 
+
 @retry(retry=retry_if_exception_type(exceptions.TelegramNetworkError), stop=stop_after_attempt(3))
 async def master_handler(
     message: types.Message,
@@ -46,13 +49,13 @@ async def master_handler(
     status_msg = await message.answer("The file is being prepared. Please wait a moment.")
 
     try:
-        filename = await download_function()
+        filename = await async_download(download_function)
 
         if filename.endswith(".mp4"):
             props = get_video_properties(filename)
             await send_function(types.FSInputFile(filename), caption=caption, height=props["height"], width=props["width"])
         else:
-            await send_function(types.FSInputFile(filename), caption=caption)
+            await send_function(message, filename)
 
     except exceptions.TelegramEntityTooLarge:
         await status_msg.edit_text(ERROR_MESSAGES["size_limit"])
