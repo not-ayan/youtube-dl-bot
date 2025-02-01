@@ -26,11 +26,11 @@ def gallery_dl_download_images(url: str) -> list:
         raise ValueError("No images were downloaded.")
     return images, timestamp_dir
 
-# Updated regex to catch failed yt-dlp downloads
-@router.message(F.text.regexp(r"(reddit\.com/.*(\.jpg|\.png|\.gif|/comments/|/r/|gallery|/s/))|(x\.com/.*(?:photo|status))"))
+# Update regex to only handle Reddit and ensure no conflict with X module
+@router.message(F.text.regexp(r"reddit\.com/.*(\.jpg|\.png|\.gif|/comments/|/r/|gallery|/s/)"))
 async def rx_gallery_images(message: types.Message) -> None:
     """
-    Handler for Reddit and X/Twitter media that yt-dlp can't handle
+    Handler for Reddit media that yt-dlp can't handle
     """
     try:
         mention = f'<a href="tg://user?id={message.from_user.id}">{message.from_user.full_name}</a>'
