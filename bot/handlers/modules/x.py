@@ -77,9 +77,8 @@ async def x(message: types.Message) -> None:
     filename = f"downloads/{time.time_ns()}-{message.from_user.id}.mp4"
     await master_handler(
         message=message,
-        send_function=message.answer_video,
-        download_function=lambda: download_x(message.text, filename),
-        caption=f'<a href="{message.text}">Source</a>\n\nUploaded by {mention}'
+        send_function=lambda msg, fn: msg.answer_video(types.FSInputFile(fn), caption=f'<a href="{message.text}">Source</a>\n\nUploaded by {mention}'),
+        download_function=lambda: download_x(message.text, filename)
     )
 
 @router.callback_query(lambda c: c.data.startswith(tuple(links)))
@@ -90,7 +89,6 @@ async def x2(callback: types.CallbackQuery) -> None:
 
     await master_handler(
         message=callback.message,
-        send_function=callback.message.answer_video,
-        download_function=lambda: download_x(data[0], filename),
-        caption=f'<a href="{data[0]}">Source</a>\nUploaded by {mention}'
+        send_function=lambda msg, fn: msg.answer_video(types.FSInputFile(fn), caption=f'<a href="{data[0]}">Source</a>\nUploaded by {mention}'),
+        download_function=lambda: download_x(data[0], filename)
     )

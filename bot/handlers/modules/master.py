@@ -50,7 +50,7 @@ async def master_handler(
 
         if filename.endswith(".mp4"):
             props = get_video_properties(filename)
-            await send_function(types.FSInputFile(filename), caption=caption, height=props["height"], width=props["width"])
+            await send_function(message, filename)
         else:
             await send_function(message, filename)
 
