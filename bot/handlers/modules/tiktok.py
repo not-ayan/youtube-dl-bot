@@ -7,7 +7,6 @@ from handlers.modules.master import master_handler
 
 router = Router()
 
-
 def download_tiktok(url: str, filename: str) -> tuple:
     opts = {
         "format": "best",
@@ -21,7 +20,6 @@ def download_tiktok(url: str, filename: str) -> tuple:
         yt.download([url])
     return filename, original_caption
 
-
 links = [
     "https://www.tiktok.com/",
     "https://vt.tiktok.com/",
@@ -30,7 +28,6 @@ links = [
     "https://instagram.com/reel/",
     "https://www.instagram.com/share/",
 ]
-
 
 @router.message(F.text.startswith(tuple(links)))
 async def tiktok(message: types.Message) -> None:
