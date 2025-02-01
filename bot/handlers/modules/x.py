@@ -1,41 +1,49 @@
-import json
-import re
-import time
-import yt_dlp
 import os
+import time
 import logging
+import subprocess
+import yt_dlp
 from aiogram import F, Router, types, exceptions
 
 from handlers.modules.master import master_handler
 
 router = Router()
 
-def vids_count(url: str) -> int:
-    with yt_dlp.YoutubeDL() as ydl:
-        try:
-            info = ydl.extract_info(url, download=False)
-        except yt_dlp.utils.DownloadError as e:
-            logging.error(f"yt-dlp failed: {e}")
-            return 0
-        if "entries" in info:
-            return len(info["entries"])
-        return 1
+def gallery_dl_download(url: str, filename: str) -> str:
+    dest_dir = os.path.dirname(filename)
+    os.makedirs(dest_dir, exist_ok=True)
+    cmd = ["gallery-dl", "--dest", dest_dir, url]
+    process = subprocess.run(cmd, capture_output=True, text=True)
+    if process.returncode != 0:
+        logging.error(f"gallery-dl failed: {process.stderr}")
+        raise ValueError("gallery-dl failed to download the media.")
+    
+    downloaded_files = []
+    for root, _, files in os.walk(dest_dir):
+        for file in files:
+            if file.lower().endswith((".jpg", ".jpeg", ".png", ".gif", ".mp4")):
+                downloaded_files.append(os.path.join(root, file))
+    
+    if not downloaded_files:
+        raise ValueError("No files were downloaded with gallery-dl.")
+    
+    return downloaded_files[0]
 
-def download_x(url: str, filename: str, video_index: int = 0) -> str:
-    try:
-        with yt_dlp.YoutubeDL({"outtmpl": filename, "format": "best"}) as ydl:
-            info = ydl.extract_info(url, download=False)
-            if "entries" in info:
-                url = info["entries"][video_index]["url"]
-            ydl.download([url])
-    except yt_dlp.utils.DownloadError as e:
-        logging.error(f"yt-dlp failed: {e}")
-        raise ValueError("yt-dlp failed to download the media.")
-    
-    if not os.path.isfile(filename):
-        raise ValueError("File download failed. Please try again.")
-    
+def yt_dlp_download(url: str, filename: str) -> str:
+    opts = {
+        "format": "best",
+        "outtmpl": filename,
+    }
+    with yt_dlp.YoutubeDL(opts) as ydl:
+        ydl.download([url])
     return filename
+
+def download_x(url: str, filename: str) -> str:
+    try:
+        return gallery_dl_download(url, filename)
+    except Exception as e:
+        logging.error(f"gallery-dl failed: {e}. Trying yt-dlp...")
+        return yt_dlp_download(url, filename)
 
 links = [
     "https://x.com/",
@@ -46,10 +54,7 @@ def keyboard(number: int, url: str) -> types.InlineKeyboardMarkup:
     kb = [[types.InlineKeyboardButton(text=f"Video {i+1}", callback_data=f"{url}!{i}")] for i in range(number)]
     return types.InlineKeyboardMarkup(inline_keyboard=kb)
 
-@router.message(
-    F.text.startswith(tuple(links))
-    & ~F.text.regexp(r'photo|\.jpg|\.jpeg|\.png|\.gif')  # exclude references to images
-)
+@router.message(F.text.startswith(tuple(links)))
 async def x(message: types.Message) -> None:
     mention = f'<a href="tg://user?id={message.from_user.id}">{message.from_user.full_name}</a>'
     count = vids_count(message.text)

@@ -41,10 +41,7 @@ links = [
     "https://www.reddit.com/r/",
 ]
 
-@router.message(
-    F.text.startswith(tuple(links))
-    & ~F.text.regexp(r'\.(jpg|jpeg|png|gif)')  # exclude common image patterns
-)
+@router.message(F.text.startswith(tuple(links)))
 async def reddit(message: types.Message) -> None:
     try:
         filename = "downloaded_reddit_post.mp4"
