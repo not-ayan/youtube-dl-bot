@@ -78,7 +78,7 @@ async def x(message: types.Message) -> None:
     await master_handler(
         message=message,
         send_function=message.answer_video,
-        download_function=lambda: await download_x(message.text, filename),
+        download_function=lambda: download_x(message.text, filename),
         caption=f'<a href="{message.text}">Source</a>\n\nUploaded by {mention}'
     )
 
@@ -91,6 +91,6 @@ async def x2(callback: types.CallbackQuery) -> None:
     await master_handler(
         message=callback.message,
         send_function=callback.message.answer_video,
-        download_function=lambda: await download_x(data[0], filename),
+        download_function=lambda: download_x(data[0], filename),
         caption=f'<a href="{data[0]}">Source</a>\nUploaded by {mention}'
     )
