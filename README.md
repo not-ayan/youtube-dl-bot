@@ -41,6 +41,10 @@ Follow these steps to set up and run the bot on your local machine or server.
 
 - Python 3.8 or higher
 - `pip` (Python package manager)
+- FFmpeg (for merging audio and video), for example on Debian-based systems:
+  ```bash
+  sudo apt update && sudo apt install ffmpeg
+  ```
 - A Telegram bot token from [BotFather](https://t.me/BotFather)
 
 ### Steps
