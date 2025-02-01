@@ -58,49 +58,13 @@ async def x(message: types.Message) -> None:
             pass
         await message.answer("Multiple videos found in the post. Please select which one you want to download", reply_markup=keyboard(count, message.text))
     else:
-        try:
-            # First try with yt-dlp
-            filename = f"{time.time_ns()}-{message.from_user.id}.mp4"
-            await master_handler(
-                message=message,
-                send_function=message.answer_video,
-                download_function=lambda: download_x(message.text, filename),
-                caption=f'<a href="{message.text}">Source</a>\nShared by {mention}'
-            )
-        except ValueError as e:
-            if "yt-dlp failed" in str(e):
-                # If yt-dlp fails, try gallery-dl through rx_gallery
-                from .rx_gallery import gallery_dl_download_images
-                try:
-                    images, temp_dir = gallery_dl_download_images(message.text)
-                    try:
-                        if len(images) > 1:
-                            media_group = []
-                            for i, img in enumerate(images):
-                                media_group.append(
-                                    types.InputMediaPhoto(
-                                        media=types.FSInputFile(img),
-                                        caption=f'<a href="{message.text}">Source</a>\nShared by {mention}' if i == 0 else ""
-                                    )
-                                )
-                            await message.answer_media_group(media_group)
-                        else:
-                            await master_handler(
-                                message=message,
-                                send_function=message.answer_photo,
-                                download_function=lambda: images[0],
-                                caption=f'<a href="{message.text}">Source</a>\nShared by {mention}'
-                            )
-                    finally:
-                        if os.path.exists(temp_dir):
-                            import shutil
-                            shutil.rmtree(temp_dir)
-                except Exception as gallery_error:
-                    await message.answer(f"Failed to download media: {str(gallery_error)}")
-            else:
-                await message.answer(f"Error downloading media: {str(e)}")
-        except Exception as e:
-            await message.answer(f"Error: {str(e)}")
+        filename = f"{time.time_ns()}-{message.from_user.id}.mp4"
+        await master_handler(
+            message=message,
+            send_function=message.answer_video,
+            download_function=lambda: download_x(message.text, filename),
+            caption=f'<a href="{message.text}">Source</a>\nShared by {mention}'
+        )
 
 @router.callback_query(lambda c: c.data.startswith(tuple(links)))
 async def x2(callback: types.CallbackQuery) -> None:
