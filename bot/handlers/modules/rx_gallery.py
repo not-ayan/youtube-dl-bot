@@ -29,6 +29,19 @@ def gallery_dl_download_images(url: str) -> list:
         raise ValueError("No images were downloaded.")
     return images
 
+def download_video(url: str, filename: str) -> str:
+    try:
+        with yt_dlp.YoutubeDL({"outtmpl": filename, "format": "best"}) as ydl:
+            ydl.download([url])
+    except yt_dlp.utils.DownloadError as e:
+        logging.error(f"yt-dlp failed: {e}")
+        raise ValueError("yt-dlp failed to download the media.")
+    
+    if not os.path.isfile(filename):
+        raise ValueError("File download failed. Please try again.")
+    
+    return filename
+
 @router.message(F.text.regexp(r"(reddit\.com/.*(\.jpg|\.png|\.gif|/comments/|/r/|gallery))|(x\.com/.*photo)"))
 async def rx_gallery_images(message: types.Message) -> None:
     """
@@ -56,6 +69,24 @@ async def rx_gallery_images(message: types.Message) -> None:
                 download_function=lambda: images[0],  # Already downloaded
                 caption=f'<a href="{message.text}">Source</a>\nShared by {mention}'
             )
+    except Exception as e:
+        await message.answer(f"Error: {e}")
+
+@router.message(F.text.regexp(r"(reddit\.com/.*)|(x\.com/.*)"))
+async def rx_gallery_videos(message: types.Message) -> None:
+    """
+    This router looks for possible Reddit or X links containing videos.
+    The regex is a simplistic approach that you can adjust as needed.
+    """
+    try:
+        mention = f'<a href="tg://user?id={message.from_user.id}">{message.from_user.full_name}</a>'
+        filename = f"{time.time_ns()}-{message.from_user.id}.mp4"
+        await master_handler(
+            message=message,
+            send_function=message.answer_video,
+            download_function=lambda: download_video(message.text, filename),
+            caption=f'<a href="{message.text}">Source</a>\nShared by {mention}'
+        )
     except Exception as e:
         await message.answer(f"Error: {e}")
 
