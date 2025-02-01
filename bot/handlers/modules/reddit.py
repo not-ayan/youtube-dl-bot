@@ -37,13 +37,9 @@ def download_reddit_post(url: str, filename: str) -> str:
     logging.info(f"File {common_filename} downloaded successfully.")
     return common_filename
 
-links = [
-    "https://www.reddit.com/r/",
-]
-
 @router.message(
-    F.text.startswith(tuple(links))
-    & ~F.text.regexp(r'\.(jpg|jpeg|png|gif)')  # exclude common image patterns
+    F.text.startswith(tuple(["https://www.reddit.com/r/"]))
+    & ~F.text.regexp(r'\.(jpg|jpeg|png|gif)')
 )
 async def reddit(message: types.Message) -> None:
     try:
