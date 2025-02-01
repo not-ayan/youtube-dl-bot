@@ -74,7 +74,7 @@ async def youtube(message: types.Message) -> None:
         except exceptions.TelegramBadRequest:
             pass
     except Exception as e:
-        await message.answer(f"Error retrieving video information: {str(e)})
+        await message.answer(f"Error retrieving video information: {str(e)}")
 
 @router.callback_query(lambda c: c.data.startswith(tuple(links)))
 async def process_download(callback: types.CallbackQuery) -> None:
