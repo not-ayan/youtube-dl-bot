@@ -1,13 +1,19 @@
 import time
-
 import yt_dlp
+import os
 from aiogram import F, Router, types, exceptions
+from dotenv import load_dotenv
 from youthon import Video
 
 from handlers.modules.master import master_handler
 
 router = Router()
 
+# Load environment variables
+load_dotenv()
+
+USE_COOKIES = os.getenv("USE_COOKIES", "false").lower() == "true"
+COOKIES_FILE = "cookies/cookies.txt" if USE_COOKIES else None
 
 def get_ydl_opts(quality: str, filename: str) -> dict:
     formats = {
@@ -17,8 +23,9 @@ def get_ydl_opts(quality: str, filename: str) -> dict:
         "audio": {"format": "bestaudio[ext=m4a]", "postprocessors": [{"key": "FFmpegExtractAudio", "preferredcodec": "mp3"}]},
     }
     opts = {"outtmpl": filename, "postprocessors": [{"key": "FFmpegFixupM4a"}, {"key": "FFmpegFixupStretched"}]}
+    if COOKIES_FILE:
+        opts["cookiefile"] = COOKIES_FILE
     return {**opts, **formats[quality]}
-
 
 def download_youtube(url: str, filename: str, quality: str) -> str:
     fname = filename[:-4] if quality in ["best", "fhd", "audio"] else filename
@@ -26,14 +33,12 @@ def download_youtube(url: str, filename: str, quality: str) -> str:
         ydl.download([url])
     return filename
 
-
 links = [
     "https://www.youtube.com/watch?v=",
     "https://youtu.be/",
     "https://www.youtube.com/shorts/",
     "https://youtube.com/shorts/",
 ]
-
 
 def keyboard(url: str) -> types.InlineKeyboardMarkup:
     kb = [
@@ -43,7 +48,6 @@ def keyboard(url: str) -> types.InlineKeyboardMarkup:
         [types.InlineKeyboardButton(text="🎵 Audio only", callback_data=f"{url}!audio")],
     ]
     return types.InlineKeyboardMarkup(inline_keyboard=kb)
-
 
 @router.message(F.text.startswith(tuple(links)))
 async def youtube(message: types.Message) -> None:
@@ -69,7 +73,6 @@ async def youtube(message: types.Message) -> None:
             pass
     except Exception as e:
         await message.answer(f"Error retrieving video information: {str(e)}")
-
 
 @router.callback_query(lambda c: c.data.startswith(tuple(links)))
 async def process_download(callback: types.CallbackQuery) -> None:

@@ -51,11 +51,11 @@ Follow these steps to set up and run the bot on your local machine or server.
 2. **Install Dependencies**:
    - For most systems:
      ```bash
-     pip install -r requirements.txt
+     pip install -r bot/requirements.txt
      ```
    - If you encounter issues with system packages (e.g., on Linux):
      ```bash
-     pip install -r requirements.txt --break-system-packages
+     pip install -r bot/requirements.txt --break-system-packages
      ```
 
 3. **Configure the Bot**:
@@ -68,7 +68,14 @@ Follow these steps to set up and run the bot on your local machine or server.
      TOKEN=your_bot_token_here
      ```
 
-4. **Start the Bot**:
+4. **Using Cookies for YouTube Downloads**:
+   - If you want to use cookies for YouTube downloads, set `USE_COOKIES` to `true` in the `.env` file:
+     ```
+     USE_COOKIES=true
+     ```
+   - Place your `cookies.txt` file in the `cookies` directory.
+
+5. **Start the Bot**:
    - Run the bot using the following command:
      ```bash
      python3 bot/main.py
