@@ -47,7 +47,7 @@ def keyboard(number: int, url: str) -> types.InlineKeyboardMarkup:
     return types.InlineKeyboardMarkup(inline_keyboard=kb)
 
 @router.message(
-    F.text.startswith(tuple(["https://x.com/", "https://twitter.com/"]))
+    F.text.startswith(tuple(links))
     & ~F.text.regexp(r'photo|\.jpg|\.jpeg|\.png|\.gif')  # exclude references to images
 )
 async def x(message: types.Message) -> None:

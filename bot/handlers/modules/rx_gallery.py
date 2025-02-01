@@ -26,7 +26,6 @@ def gallery_dl_download_images(url: str) -> list:
         raise ValueError("No images were downloaded.")
     return images
 
-# ...existing code...
 @router.message(F.text.regexp(r'(reddit\.com/.*(\.jpg|\.png|\.gif|gallery))|(x\.com/.*photo)'))
 async def rx_gallery_images(message: types.Message) -> None:
     """
