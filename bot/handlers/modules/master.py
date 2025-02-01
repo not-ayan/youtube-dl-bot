@@ -50,9 +50,9 @@ async def master_handler(
 
         if filename.endswith(".mp4"):
             props = get_video_properties(filename)
-            await send_function(message, filename)
+            await send_function(types.FSInputFile(filename), caption=caption, height=props["height"], width=props["width"])
         else:
-            await send_function(message, filename)
+            await send_function(types.FSInputFile(filename), caption=caption)
 
     except exceptions.TelegramEntityTooLarge:
         await status_msg.edit_text(ERROR_MESSAGES["size_limit"])
