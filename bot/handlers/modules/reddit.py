@@ -25,6 +25,8 @@ def download_reddit_post(url: str, filename: str) -> str:
     
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=False)
+            original_caption = info.get('description', '')
             ydl.download([url])
     except yt_dlp.utils.DownloadError as e:
         logging.error(f"Error downloading Reddit post: {e}")
@@ -35,7 +37,7 @@ def download_reddit_post(url: str, filename: str) -> str:
         raise ValueError("File download failed. Please try again.")
     
     logging.info(f"File {common_filename} downloaded successfully.")
-    return common_filename
+    return common_filename, original_caption
 
 links = [
     "https://www.reddit.com/r/",
@@ -49,11 +51,11 @@ async def reddit(message: types.Message) -> None:
     try:
         filename = "downloaded_reddit_post.mp4"
         mention = f'<a href="tg://user?id={message.from_user.id}">{message.from_user.full_name}</a>'
-        await master_handler(
+        filename, original_caption = await master_handler(
             message=message,
             send_function=message.answer_video,
             download_function=lambda: download_reddit_post(message.text, filename),
-            caption=f'<a href="{message.text}">Source</a>\n\nUploaded by {mention}'
+            caption=f'{original_caption}\n\n<a href="{message.text}">Source</a>\n\nShared by {mention}'
         )
     except Exception as e:
         logging.error(f"Error downloading Reddit post: {e}")

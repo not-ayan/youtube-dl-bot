@@ -42,7 +42,7 @@ async def rx_gallery_images(message: types.Message) -> None:
                 media_group.append(
                     types.InputMediaPhoto(
                         media=types.FSInputFile(img),
-                        caption=f'<a href="{message.text}">Source</a>\nShared by {mention}' if i == 0 else ""
+                        caption=f'Original caption if exists\n\n<a href="{message.text}">Source</a>\nShared by {mention}' if i == 0 else ""
                     )
                 )
             await message.answer_media_group(media_group)
@@ -51,7 +51,7 @@ async def rx_gallery_images(message: types.Message) -> None:
                 message=message,
                 send_function=message.answer_photo,
                 download_function=lambda: images[0],  # Already downloaded
-                caption=f'<a href="{message.text}">Source</a>\nShared by {mention}'
+                caption=f'Original caption if exists\n\n<a href="{message.text}">Source</a>\nShared by {mention}'
             )
     except Exception as e:
         await message.answer(f"Error: {e}")

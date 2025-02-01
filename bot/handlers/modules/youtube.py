@@ -30,8 +30,10 @@ def get_ydl_opts(quality: str, filename: str) -> dict:
 def download_youtube(url: str, filename: str, quality: str) -> str:
     fname = filename[:-4] if quality in ["best", "fhd", "audio"] else filename
     with yt_dlp.YoutubeDL(get_ydl_opts(quality, fname)) as ydl:
+        info = ydl.extract_info(url, download=False)
+        original_caption = info.get('description', '')
         ydl.download([url])
-    return filename
+    return filename, original_caption
 
 links = [
     "https://www.youtube.com/watch?v=",
@@ -55,11 +57,11 @@ async def youtube(message: types.Message) -> None:
         mention = f'<a href="tg://user?id={message.from_user.id}">{message.from_user.full_name}</a>'
         if any(short in message.text for short in ["https://www.youtube.com/shorts/", "https://youtube.com/shorts/"]):
             filename = f"{time.time_ns()}-{message.from_user.id}.mp4"
-            await master_handler(
+            filename, original_caption = await master_handler(
                 message=message,
                 send_function=message.answer_video,
                 download_function=lambda: download_youtube(message.text, filename, "fhd"),
-                caption=f'<a href="{message.text}">Source</a>\nShared by {mention}'
+                caption=f'{original_caption}\n\n<a href="{message.text}">Source</a>\nShared by {mention}'
             )
         else:
             await message.answer_photo(
@@ -72,7 +74,7 @@ async def youtube(message: types.Message) -> None:
         except exceptions.TelegramBadRequest:
             pass
     except Exception as e:
-        await message.answer(f"Error retrieving video information: {str(e)}")
+        await message.answer(f"Error retrieving video information: {str(e)})
 
 @router.callback_query(lambda c: c.data.startswith(tuple(links)))
 async def process_download(callback: types.CallbackQuery) -> None:
@@ -81,9 +83,9 @@ async def process_download(callback: types.CallbackQuery) -> None:
     extension = "mp3" if quality == "audio" else "mp4"
     filename = f"{time.time_ns()}-{callback.message.from_user.id}.{extension}"
 
-    await master_handler(
+    filename, original_caption = await master_handler(
         message=callback.message,
         send_function=callback.message.answer_video if quality != "audio" else callback.message.answer_audio,
         download_function=lambda: download_youtube(url, filename, quality),
-        caption=f'<a href="{url}">Source</a>\nUploaded by {mention}'
+        caption=f'{original_caption}\n\n<a href="{url}">Source</a>\nUploaded by {mention}'
     )

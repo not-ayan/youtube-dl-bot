@@ -15,8 +15,10 @@ def download_tiktok(url: str, filename: str) -> str:
         "http_headers": {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/91.0.4472.124 Safari/537.36"},
     }
     with yt_dlp.YoutubeDL(opts) as yt:
+        info = yt.extract_info(url, download=False)
+        original_caption = info.get('description', '')
         yt.download([url])
-    return filename
+    return filename, original_caption
 
 
 links = [
@@ -33,9 +35,9 @@ links = [
 async def tiktok(message: types.Message) -> None:
     filename = f"{time.time_ns()}-{message.from_user.id}.mp4"
     mention = f'<a href="tg://user?id={message.from_user.id}">{message.from_user.full_name}</a>'
-    await master_handler(
+    filename, original_caption = await master_handler(
         message=message,
         send_function=message.answer_video,
         download_function=lambda: download_tiktok(message.text, filename),
-        caption=f'<a href="{message.text}">Source</a>\nShared by {mention}'
+        caption=f'{original_caption}\n\n<a href="{message.text}">Source</a>\nShared by {mention}'
     )
