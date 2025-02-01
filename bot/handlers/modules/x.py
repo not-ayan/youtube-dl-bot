@@ -52,11 +52,11 @@ def yt_dlp_download(url: str, filename: str) -> str:
         ydl.download([url])
     return filename
 
-def download_x(url: str, filename: str) -> str:
+async def download_x(url: str, filename: str) -> str:
     download_dir = os.path.dirname(filename)
     gallery_dl = GalleryDL(url, download_dir)
     try:
-        gallery_dl.scrape()
+        await gallery_dl.scrape()
         if gallery_dl.extraction_success:
             if gallery_dl.single_media:
                 return gallery_dl.single_media
