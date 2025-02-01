@@ -1,10 +1,13 @@
 import os
 import time
+import glob
 import logging
 import subprocess
 from aiogram import F, Router, types
+from urllib.parse import urlparse
 
 from handlers.modules.master import master_handler
+from handlers.modules.base_scrapper import BaseScrapper
 
 router = Router()
 
